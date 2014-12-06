@@ -1,3 +1,6 @@
+# Unity3D .gitignore file.
+.DS_Store
+
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
