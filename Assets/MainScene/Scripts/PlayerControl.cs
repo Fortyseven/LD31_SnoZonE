@@ -6,6 +6,11 @@ public class PlayerControl : MonoBehaviour
 
     private TankMovement treads;
 
+    void OnCollisionEnter( Collision other )
+    {
+        Debug.Log( "Hit " + other.collider.name );
+    }
+
     void Start()
     {
         treads = GetComponent<TankMovement>();
