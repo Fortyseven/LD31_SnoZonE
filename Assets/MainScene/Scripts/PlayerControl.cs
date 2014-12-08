@@ -27,8 +27,38 @@ public class PlayerControl : MonoBehaviour
         if ( Input.GetButtonDown( "Fire" ) ) {
             FireCannon();
         }
-        treads.RotateLeft( Input.GetAxis( "Left Tread" ) );
-        treads.RotateRight( Input.GetAxis( "Right Tread" ) );
+
+        //treads.RotateLeft( Input.GetAxis( "Left Tread" ) );
+        //treads.RotateRight( Input.GetAxis( "Right Tread" ) );
+
+        float left_tread = 0;
+        float right_tread = 0;
+
+        //left_tread += Input.GetAxis( "Left Tread" );
+        //right_tread += Input.GetAxis( "Right Tread" );
+
+        if ( Input.GetButton( "Forward" ) ) {
+            left_tread += 1.0f;
+            right_tread += 1.0f;
+        }
+        if ( Input.GetButton( "Reverse" ) ) {
+            left_tread -= 1.0f;
+            right_tread -= 1.0f;
+        }
+
+        if ( Input.GetButton( "TurnLeft" ) ) {
+            right_tread += 1.0f;
+            left_tread -= 1.0f;
+        }
+        if ( Input.GetButton( "TurnRight" ) ) {
+            left_tread += 1.0f;
+            right_tread -= 1.0f;
+        }
+
+
+        treads.RotateLeft( Mathf.Clamp( left_tread, -1.0f, 1.0f ) );
+        treads.RotateRight( Mathf.Clamp( right_tread, -1.0f, 1.0f ) );
+
     }
 
     private void FireCannon()
