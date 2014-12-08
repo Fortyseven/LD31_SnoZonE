@@ -7,21 +7,35 @@ public class PlayerControl : MonoBehaviour
     public GameObject SnowBallObject;
 
     private const float CANNON_FORCE = 5000.0f;
-    private TankMovement treads;
+    private TankMovement _treads;
 
+    private Vector3 _start_position;
+    //private Quaternion _start_rotation; //NOTE: Is this necessary?
+
+    /******************************************************************/
     void OnCollisionEnter( Collision other )
     {
         Debug.Log( "Hit " + other.collider.name );
     }
 
+    /******************************************************************/
     void Start()
     {
-        Debug.Log( "LAYERPLAYER:" + LayerMask.NameToLayer( "Player" ) );
+        _start_position = transform.position;
+        //_start_rotation = transform.rotation;
+
         Physics.IgnoreLayerCollision( LayerMask.NameToLayer( "Player" ), LayerMask.NameToLayer( "Player" ) );
-        treads = GetComponent<TankMovement>();
+        _treads = GetComponent<TankMovement>();
     }
 
-    // Update is called once per frame
+    /******************************************************************/
+    public void Reset()
+    {
+        transform.position = _start_position;
+        //transform.rotation = _start_rotation;
+    }
+
+    /******************************************************************/
     void Update()
     {
         if ( Input.GetButtonDown( "Fire" ) ) {
@@ -56,11 +70,12 @@ public class PlayerControl : MonoBehaviour
         }
 
 
-        treads.RotateLeft( Mathf.Clamp( left_tread, -1.0f, 1.0f ) );
-        treads.RotateRight( Mathf.Clamp( right_tread, -1.0f, 1.0f ) );
+        _treads.RotateLeft( Mathf.Clamp( left_tread, -1.0f, 1.0f ) );
+        _treads.RotateRight( Mathf.Clamp( right_tread, -1.0f, 1.0f ) );
 
     }
 
+    /******************************************************************/
     private void FireCannon()
     {
         GameObject ball = Instantiate( SnowBallObject, transform.position, Quaternion.identity ) as GameObject;

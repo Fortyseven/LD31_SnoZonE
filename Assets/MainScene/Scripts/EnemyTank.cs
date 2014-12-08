@@ -3,6 +3,14 @@ using System.Collections;
 
 public class EnemyTank : MonoBehaviour
 {
+    /* Note: these enemies should be in an object pool, but we're
+     * just instantiating/destroying because I'm in a hurry. */
+
+    private const float CHASE_UPDATE_DELAY = 0.5f;
+    private const float STALE_STATE_HACK_TIMEOUT = 15.0f;
+    private const float MIN_SPEED = 1.0f;
+    private const float MAX_SPEED = 6.0f;
+
     private NavMeshAgent _agent;
     private TankMovement _treads;
 
@@ -10,16 +18,13 @@ public class EnemyTank : MonoBehaviour
     {
         SPAWNING,           // spawn animation playing; don't move
         IDLE,               // ready to switch to other state
-        HUNTING_PLAYER,     // 
+        CHASING_PLAYER,     // 
         WANDERING           // moving to a random spot
     }
     private State _current_state;
     private Vector3 _target;
-
-    private const float PLAYING_FIELD_X_MIN = 10.0f;
-    private const float PLAYING_FIELD_X_MAX = 90.0f;
-    private const float PLAYING_FIELD_Z_MIN = 8.0f;
-    private const float PLAYING_FIELD_Z_MAX = 90.0f;
+    private float _chase_update;
+    private float _state_watchdog_timer_hack;
 
     /******************************************************************/
     void Start()
@@ -31,6 +36,9 @@ public class EnemyTank : MonoBehaviour
         Utils.Assert( _agent );
 
         _current_state = State.SPAWNING;
+
+        _agent.speed = Random.Range( MIN_SPEED, MAX_SPEED );
+        Debug.Log( "### Spawned snowman with speed " + _agent.speed );
     }
 
     /******************************************************************/
@@ -39,19 +47,42 @@ public class EnemyTank : MonoBehaviour
         if ( _current_state == State.SPAWNING )
             return;
 
+        if ( IsStopped() ) {
+            Debug.Log( "### I have stopped. Going IDLE to decide next move." );
+            _current_state = State.IDLE;
+            ChangeState();
+            return;
+        }
+
+        // TODO: If player is inside radius, switch to hunting mode
+
         switch ( _current_state ) {
             case State.IDLE:
                 ChangeState();
                 break;
-            case State.HUNTING_PLAYER:
-            case State.WANDERING:
-                Debug.DrawLine( transform.position, _target );
-                if ( IsStopped() ) {
-                    Debug.Log( "### I have stopped." );
-                    _current_state = State.IDLE;
+            case State.CHASING_PLAYER:
+                if ( Time.time > _chase_update ) {
+                    _chase_update = Time.time + CHASE_UPDATE_DELAY;
+                    _agent.SetDestination( GameController.instance.Player.transform.position );
+                    // There's a chance we'll lose interest and break off
+                    if ( Random.Range( 0, 10 ) == 4 ) {
+                        Debug.Log( "### Bored of CHASING, now WANDERING..." );
+                        StateWanderStart();
+                    }
                 }
                 break;
+            case State.WANDERING:
+                _myvelocity = _agent.velocity;
+
+                break;
         }
+
+        // HACKHACK
+        if ( Time.time > _state_watchdog_timer_hack ) {
+            NavmeshHackAssBoot();
+            return;
+        }
+        Debug.DrawLine( transform.position, _target );
 
         //_treads.RotateLeft( 1.0f );
         //_treads.RotateRight( 1.0f );
@@ -77,17 +108,34 @@ public class EnemyTank : MonoBehaviour
             StateWanderStart();
         }
         else {
-            StateHuntPlayerStart();
+            StateChasePlayerStart();
         }
+        StateChasePlayerStart();
+
+        _state_watchdog_timer_hack = Time.time + STALE_STATE_HACK_TIMEOUT;
+    }
+
+    /******************************************************************/
+    public void NavmeshHackAssBoot()
+    {
+        Debug.Log( "### HACK: Booting in the ass" );
+        Vector3 newpos = new Vector3(
+                        Random.Range( GameController.PLAYING_FIELD_X_MIN, GameController.PLAYING_FIELD_X_MAX ),
+                        0.0f,
+                        Random.Range( GameController.PLAYING_FIELD_Z_MIN, GameController.PLAYING_FIELD_Z_MAX )
+                        );
+
+        _agent.Warp( newpos );
+        ChangeState();
     }
 
     /******************************************************************/
     public void StateWanderStart()
     {
         _target = new Vector3(
-                        Random.RandomRange( PLAYING_FIELD_X_MIN, PLAYING_FIELD_X_MAX ),
+                        Random.Range( GameController.PLAYING_FIELD_X_MIN, GameController.PLAYING_FIELD_X_MAX ),
                         0.0f,
-                        Random.RandomRange( PLAYING_FIELD_Z_MIN, PLAYING_FIELD_Z_MAX )
+                        Random.Range( GameController.PLAYING_FIELD_Z_MIN, GameController.PLAYING_FIELD_Z_MAX )
                         );
 
         NavMeshHit hit;
@@ -99,10 +147,12 @@ public class EnemyTank : MonoBehaviour
         _current_state = State.WANDERING;
     }
     /******************************************************************/
-    public void StateHuntPlayerStart()
+    public void StateChasePlayerStart()
     {
-        _current_state = State.HUNTING_PLAYER;
-        Debug.Log( "### I have begun HUNTING player" );
+        _current_state = State.CHASING_PLAYER;
+        Debug.Log( "### I have begun CHASING player" );
+        _agent.SetDestination( GameController.instance.Player.transform.position );
+        _chase_update = Time.time + CHASE_UPDATE_DELAY;
     }
 
     /******************************************************************/
@@ -116,8 +166,10 @@ public class EnemyTank : MonoBehaviour
     public void OnCollisionEnter( Collision col )
     {
         if ( col.gameObject.tag == "Projectile" ) {
+            //TODO: Death animation, etc
             Destroy( this.gameObject );
             Destroy( col.gameObject );
+            GameController.instance.OnSnowmanKilled();
         }
     }
 }

@@ -11,8 +11,10 @@ public class ReticleController : MonoBehaviour
 
     void Start()
     {
-        _imgReticle = ReticleObject.GetComponent<Image>();
+        _imgReticle = GameObject.Find( "imgReticle" ).gameObject.GetComponent<Image>();
         Utils.Assert( _imgReticle );
+
+        _txtRange = GameObject.Find( "lblRange" ).gameObject.GetComponent<Text>();
     }
 
     void Update()
