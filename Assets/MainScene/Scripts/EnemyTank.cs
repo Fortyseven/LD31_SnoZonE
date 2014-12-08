@@ -13,7 +13,7 @@ public class EnemyTank : MonoBehaviour
 
     private NavMeshAgent _agent;
     private TankMovement _treads;
-
+    public GameObject MyMesh;
     enum State
     {
         SPAWNING,           // spawn animation playing; don't move
@@ -72,7 +72,7 @@ public class EnemyTank : MonoBehaviour
                 }
                 break;
             case State.WANDERING:
-                _myvelocity = _agent.velocity;
+
 
                 break;
         }
@@ -163,13 +163,32 @@ public class EnemyTank : MonoBehaviour
     }
 
     /******************************************************************/
+    public void OnDeathAnimFinish()
+    {
+        Destroy( this.gameObject, 1.0f );
+    }
+
+    /******************************************************************/
     public void OnCollisionEnter( Collision col )
     {
+        // No cheap kills
+        if ( _current_state == State.SPAWNING ) 
+            return;
+
         if ( col.gameObject.tag == "Projectile" ) {
-            //TODO: Death animation, etc
-            Destroy( this.gameObject );
             Destroy( col.gameObject );
-            GameController.instance.OnSnowmanKilled();
+            KillMe();
         }
     }
+    /******************************************************************/
+    public void KillMe()
+    {
+        _current_state = State.SPAWNING;
+        _agent.Stop();
+        rigidbody.detectCollisions = false;
+        GameController.instance.OnSnowmanKilled();
+        GetComponentInChildren<ParticleSystem>().Play();
+        MyMesh.animation.Play( "SnowmanDeath" );
+    }
+
 }
