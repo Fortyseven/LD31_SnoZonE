@@ -21,10 +21,10 @@ public class PlayerControl : MonoBehaviour
     AudioSource[] _audio_sources;
 
     /******************************************************************/
-    void OnCollisionEnter( Collision other )
-    {
-        Debug.Log( "Hit " + other.collider.name );
-    }
+    //void OnCollisionEnter( Collision other )
+    //{
+    //    //Debug.Log( "Hit " + other.collider.name );
+    //}
 
     /******************************************************************/
     void Awake()

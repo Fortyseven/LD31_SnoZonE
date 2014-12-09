@@ -22,11 +22,6 @@ public class GlitchEffect : ImageEffectBase
 
     public float intensity;
 
-    public void Update()
-    {
-        Debug.Log("updating");
-    }
-
     // Called by camera to apply image effect
     void OnRenderImage( RenderTexture source, RenderTexture destination )
     {

@@ -34,9 +34,7 @@ public class GameController : MonoBehaviour
 
         private void OnLivesChange()
         {
-            Debug.Log( "LIVES == " + Lives );
             if ( Lives == 0 ) {
-                Debug.Log( "XXX GAME OVER XXX" );
                 GameOver = true;
                 GameController.instance.OnGameOver();
             }
@@ -80,7 +78,6 @@ public class GameController : MonoBehaviour
             GameObject spawn_point = GameObject.Find( "PlayerSpawn" );
             _player_instance = Instantiate( PlayerPrefab, spawn_point.transform.position, spawn_point.transform.rotation ) as GameObject;
             Player = _player_instance.GetComponent<PlayerControl>();
-            Debug.Log( "Player spawned at " + spawn_point.transform.position );
         }
     }
 
@@ -99,7 +96,6 @@ public class GameController : MonoBehaviour
     {
         if ( Info.GameOver ) {
             if ( Time.unscaledTime > _delay_since_gameover ) {
-                Debug.Log("okay ready");
                 if ( Input.anyKeyDown ) {
                     Reset();
                 }
@@ -146,7 +142,7 @@ public class GameController : MonoBehaviour
 
         Instantiate( SnowmanPrefab, target, Quaternion.identity );
 
-        Debug.Log( "Spawning new Snowman at " + target );
+        Debug.Log( "### Spawning new Snowman at " + target );
 
     }
 
