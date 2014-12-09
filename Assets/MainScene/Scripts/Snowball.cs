@@ -16,6 +16,19 @@ public class Snowball : MonoBehaviour
         Destroy( this.gameObject, LIFETIME );
     }
 
+    void Update()
+    {
+        //if ( !rigidbody.detectCollisions )
+        //    return;
+        //float foo = Mathf.Abs( rigidbody.velocity.x + rigidbody.velocity.y + rigidbody.velocity.z );
+        //if ( foo < 0.01f ) {
+        //    Debug.Log( "Snowball " + GetInstanceID() + " dead velocity: " + foo );
+        //    rigidbody.detectCollisions = false;
+        //    return;
+        //}
+        //Debug.Log( "Snowball " + GetInstanceID() + " LIVE velocity: " + foo );
+    }
+
     public void OnCollisionEnter( Collision col )
     {
         AudioSource col_audio =  col.gameObject.GetComponent<AudioSource>();
