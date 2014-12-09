@@ -11,6 +11,9 @@ public class EnemyTank : MonoBehaviour
     private const float MIN_SPEED = 1.0f;
     private const float MAX_SPEED = 6.0f;
 
+    public AudioClip[] AudioSpawn;
+    public AudioClip[] AudioDeath;
+
     private NavMeshAgent _agent;
     private TankMovement _treads;
     public GameObject MyMesh;
@@ -38,6 +41,7 @@ public class EnemyTank : MonoBehaviour
         _current_state = State.SPAWNING;
 
         _agent.speed = Random.Range( MIN_SPEED, MAX_SPEED );
+        audio.PlayOneShot( AudioSpawn[ Random.Range( 0, AudioSpawn.Length - 1 ) ] );
         Debug.Log( "### Spawned snowman with speed " + _agent.speed );
     }
 
@@ -172,23 +176,36 @@ public class EnemyTank : MonoBehaviour
     public void OnCollisionEnter( Collision col )
     {
         // No cheap kills
-        if ( _current_state == State.SPAWNING ) 
+        if ( _current_state == State.SPAWNING )
             return;
 
         if ( col.gameObject.tag == "Projectile" ) {
             Destroy( col.gameObject );
             KillMe();
         }
+
+        if ( col.gameObject.tag == "Player" ) {
+            GameController.instance.Player.HitBy( this.gameObject );
+            KillMe( false ); // no score for death by snowman, jerk
+        }
     }
     /******************************************************************/
-    public void KillMe()
+    public void KillMe( bool tell_player = true )
     {
         _current_state = State.SPAWNING;
         _agent.Stop();
         rigidbody.detectCollisions = false;
-        GameController.instance.OnSnowmanKilled();
-        GetComponentInChildren<ParticleSystem>().Play();
-        MyMesh.animation.Play( "SnowmanDeath" );
+
+        if ( tell_player ) {
+            GameController.instance.OnSnowmanKilled();
+            GetComponentInChildren<ParticleSystem>().Play();
+            MyMesh.animation.Play( "SnowmanDeath" );
+            audio.PlayOneShot( AudioDeath[ Random.Range( 0, AudioDeath.Length - 1 ) ] );
+        }
+        else {
+            // striaght to death
+            OnDeathAnimFinish();
+        }
     }
 
 }

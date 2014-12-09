@@ -6,11 +6,19 @@ public class PlayerControl : MonoBehaviour
     public GameObject FirePointObject;
     public GameObject SnowBallObject;
 
+    public bool Hurting { get; set; }
+
     private const float CANNON_FORCE = 5000.0f;
+    private const float HURT_TIME_LENGTH = 2.0f;
+    private float _hurt_timeout;
     private TankMovement _treads;
+
+    private GlitchEffect _glitch;
 
     private Vector3 _start_position;
     //private Quaternion _start_rotation; //NOTE: Is this necessary?
+
+    AudioSource[] _audio_sources;
 
     /******************************************************************/
     void OnCollisionEnter( Collision other )
@@ -19,25 +27,46 @@ public class PlayerControl : MonoBehaviour
     }
 
     /******************************************************************/
-    void Start()
+    void Awake()
     {
-        _start_position = transform.position;
+        _start_position = GameObject.Find( "PlayerSpawn" ).transform.position;
+        ;
         //_start_rotation = transform.rotation;
 
         Physics.IgnoreLayerCollision( LayerMask.NameToLayer( "Player" ), LayerMask.NameToLayer( "Player" ) );
         _treads = GetComponent<TankMovement>();
+        _glitch = GetComponentInChildren<GlitchEffect>();
+        _glitch.enabled = false;
+
+        _audio_sources = GetComponents<AudioSource>();
+        //_audio_sources[ 0 ].pan = -1;
+        //_audio_sources[ 1 ].pan = 1;
+
     }
 
     /******************************************************************/
     public void Reset()
     {
         transform.position = _start_position;
+        Hurting = false;
+        _glitch.enabled = false;
         //transform.rotation = _start_rotation;
     }
 
     /******************************************************************/
     void Update()
     {
+        if ( GameController.instance.Info.GameOver ) {
+            return;
+        }
+
+        if ( Hurting ) {
+            if ( Time.time >= _hurt_timeout )
+                _glitch.enabled = false;
+            else
+                return;
+        }
+
         if ( Input.GetButtonDown( "Fire" ) ) {
             FireCannon();
         }
@@ -69,10 +98,24 @@ public class PlayerControl : MonoBehaviour
             right_tread -= 1.0f;
         }
 
+        if ( left_tread != 0 ) {
+            if ( !_audio_sources[ 0 ].isPlaying )
+                _audio_sources[ 0 ].Play();
+        }
+        else {
+            _audio_sources[ 0 ].Stop();
+        }
+
+        if ( right_tread != 0 ) {
+            if ( !_audio_sources[ 1 ].isPlaying )
+                _audio_sources[ 1 ].Play();
+        }
+        else {
+            _audio_sources[ 1 ].Stop();
+        }
 
         _treads.RotateLeft( Mathf.Clamp( left_tread, -1.0f, 1.0f ) );
         _treads.RotateRight( Mathf.Clamp( right_tread, -1.0f, 1.0f ) );
-
     }
 
     /******************************************************************/
@@ -83,4 +126,16 @@ public class PlayerControl : MonoBehaviour
         // TODO: Would like this to fire a bit harderif we're moving forward
         ball.GetComponent<Rigidbody>().AddForce( transform.forward * ( CANNON_FORCE + rigidbody.velocity.magnitude ) );
     }
+
+    /******************************************************************/
+    public void HitBy( GameObject gameObject )
+    {
+        GameController.instance.Info.Lives--;
+        Hurting = true;
+        _glitch.enabled = true;
+        _hurt_timeout = Time.time + HURT_TIME_LENGTH;
+        GameController.instance.KillAllSnowmen();
+    }
+
+
 }

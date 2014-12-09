@@ -13,24 +13,45 @@ public class GameController : MonoBehaviour
 
     private int MAX_SNOWMAN = 5;
     private int DELAY_BETWEEN_SNOWMAN_SPAWN = 4;
+    private float DELAY_AFTER_GAME_OVER = 2.0f;
 
     public GameObject SnowmanPrefab;
     public GameObject PlayerPrefab;
-
-    public class State
-    {
-    }
+    public GameObject UIGameOver;
 
     public class GameInfo
     {
-        public int Lives { get; set; }
+        private int _lives;
+        public int Lives
+        {
+            get { return _lives; }
+            set
+            {
+                _lives = value;
+                OnLivesChange();
+            }
+        }
+
+        private void OnLivesChange()
+        {
+            Debug.Log( "LIVES == " + Lives );
+            if ( Lives == 0 ) {
+                Debug.Log( "XXX GAME OVER XXX" );
+                GameOver = true;
+                GameController.instance.OnGameOver();
+            }
+        }
+
         public long Score { get; set; }
 
         public void Reset()
         {
             Lives = 3;
             Score = 0;
+            GameOver = false;
         }
+
+        public bool GameOver { get; set; }
     }
 
     public GameInfo Info { get; private set; }
@@ -41,7 +62,7 @@ public class GameController : MonoBehaviour
 
     private int _snowman_count = 0;
     private  float _snowman_spawn_timeout;
-
+    private  float _delay_since_gameover;
 
     /******************************************************************/
     void Start()
@@ -66,13 +87,24 @@ public class GameController : MonoBehaviour
     /******************************************************************/
     void Reset()
     {
+        Time.timeScale = 1.0f;
+        UIGameOver.SetActive( false );
         Info.Reset();
+        Player.Reset();
         _snowman_spawn_timeout = Time.time + DELAY_BETWEEN_SNOWMAN_SPAWN;
     }
 
     /******************************************************************/
     void Update()
     {
+        if ( Info.GameOver ) {
+            if ( Time.unscaledTime > _delay_since_gameover ) {
+                Debug.Log("okay ready");
+                if ( Input.anyKeyDown ) {
+                    Reset();
+                }
+            }
+        }
         UIScore.text = Info.Score.ToString();
 
         if ( _snowman_count < MAX_SNOWMAN ) {
@@ -92,6 +124,17 @@ public class GameController : MonoBehaviour
     }
 
     /******************************************************************/
+    public void KillAllSnowmen()
+    {
+        // Wipe out all the other snowmen; start fresh
+        GameObject[] snowmen = GameObject.FindGameObjectsWithTag( "Enemy" );
+        for ( int i = 0; i < snowmen.Length; i++ ) {
+            Destroy( snowmen[ i ] );
+        }
+        _snowman_count = 0;
+    }
+
+    /******************************************************************/
     private void SpawnSnowman()
     {
         Vector3 target;
@@ -105,5 +148,13 @@ public class GameController : MonoBehaviour
 
         Debug.Log( "Spawning new Snowman at " + target );
 
+    }
+
+    /******************************************************************/
+    private void OnGameOver()
+    {
+        UIGameOver.SetActive( true );
+        _delay_since_gameover = Time.unscaledTime + DELAY_AFTER_GAME_OVER;
+        Time.timeScale = 0;
     }
 }
