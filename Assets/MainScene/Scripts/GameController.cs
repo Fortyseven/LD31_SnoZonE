@@ -11,9 +11,9 @@ public class GameController : MonoBehaviour
     public const float PLAYING_FIELD_Z_MIN = 8.0f;
     public const float PLAYING_FIELD_Z_MAX = 90.0f;
 
-    private int MAX_SNOWMAN = 5;
-    private int DELAY_BETWEEN_SNOWMAN_SPAWN = 4;
-    private float DELAY_AFTER_GAME_OVER = 2.0f;
+    private const int MAX_SNOWMAN = 5;
+    private const int DELAY_BETWEEN_SNOWMAN_SPAWN = 4;
+    private const float DELAY_AFTER_GAME_OVER = 2.0f;
 
     public GameObject SnowmanPrefab;
     public GameObject PlayerPrefab;

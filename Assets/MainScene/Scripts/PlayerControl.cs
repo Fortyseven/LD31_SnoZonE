@@ -16,6 +16,8 @@ public class PlayerControl : MonoBehaviour
     private GlitchEffect _glitch;
 
     private Vector3 _start_position;
+
+    private CamShake _cam_shake;
     //private Quaternion _start_rotation; //NOTE: Is this necessary?
 
     AudioSource[] _audio_sources;
@@ -39,6 +41,8 @@ public class PlayerControl : MonoBehaviour
         _glitch.enabled = false;
 
         _audio_sources = GetComponents<AudioSource>();
+
+        _cam_shake = GetComponentInChildren<CamShake>();
         //_audio_sources[ 0 ].pan = -1;
         //_audio_sources[ 1 ].pan = 1;
 
@@ -61,10 +65,13 @@ public class PlayerControl : MonoBehaviour
         }
 
         if ( Hurting ) {
-            if ( Time.time >= _hurt_timeout )
+            if ( Time.time >= _hurt_timeout ) {
                 _glitch.enabled = false;
-            else
+                _cam_shake.ShakeOff();
+            }
+            else {
                 return;
+            }
         }
 
         if ( Input.GetButtonDown( "Fire" ) ) {
@@ -123,19 +130,19 @@ public class PlayerControl : MonoBehaviour
     {
         GameObject ball = Instantiate( SnowBallObject, transform.position, Quaternion.identity ) as GameObject;
 
-        // TODO: Would like this to fire a bit harderif we're moving forward
+        // TODO: Would like this to fire a bit harder if we're moving forward
         ball.GetComponent<Rigidbody>().AddForce( transform.forward * ( CANNON_FORCE + rigidbody.velocity.magnitude ) );
     }
 
     /******************************************************************/
-    public void HitBy( GameObject gameObject )
+    public void HitBy( GameObject game_object )
     {
         GameController.instance.Info.Lives--;
         Hurting = true;
         _glitch.enabled = true;
+        _audio_sources[ 2 ].Play();
         _hurt_timeout = Time.time + HURT_TIME_LENGTH;
+        _cam_shake.ShakeOn();
         GameController.instance.KillAllSnowmen();
     }
-
-
 }
