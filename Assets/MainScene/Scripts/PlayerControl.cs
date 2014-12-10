@@ -54,6 +54,7 @@ public class PlayerControl : MonoBehaviour
         transform.position = _start_position;
         Hurting = false;
         _glitch.enabled = false;
+        _cam_shake.ShakeOff();
         //transform.rotation = _start_rotation;
     }
 
