@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class TankMovement : MonoBehaviour
 {
@@ -10,15 +9,15 @@ public class TankMovement : MonoBehaviour
     public float speed = 2.0f;
 
     // via http://answers.unity3d.com/questions/10425/how-to-stabilize-angular-motion-alignment-of-hover.html
-    void FixedUpdate()
+    public void FixedUpdate()
     {
-        Vector3 predictedUp = Quaternion.AngleAxis(
+        Vector3 predicted_up = Quaternion.AngleAxis(
             rigidbody.angularVelocity.magnitude * Mathf.Rad2Deg * stability / speed,
             rigidbody.angularVelocity
         ) * transform.up;
 
-        Vector3 torqueVector = Vector3.Cross( predictedUp, Vector3.up );
-        rigidbody.AddTorque( torqueVector * speed * speed );
+        Vector3 torque_vector = Vector3.Cross( predicted_up, Vector3.up );
+        rigidbody.AddTorque( torque_vector * speed * speed );
     }
 
     public void RotateLeft( float amount )

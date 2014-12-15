@@ -1,19 +1,18 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Text;
+using UnityEngine;
 using UnityEngine.UI;
-using System.Text;
 
 public class TextNonsense : MonoBehaviour
 {
     private const int MAX_GIBBERS = 50;
 
-    private Text _lblText;
+    private Text _lbl_text;
     private StringBuilder[] _gibberish;
 
     /******************************************************************/
-    void Start()
+    public void Start()
     {
-        _lblText = GetComponent<Text>();
+        _lbl_text = GetComponent<Text>();
 
         _gibberish = new StringBuilder[ MAX_GIBBERS ];
 
@@ -30,8 +29,8 @@ public class TextNonsense : MonoBehaviour
     }
 
     /******************************************************************/
-    void Update()
+    public void Update()
     {
-        _lblText.text = _gibberish[ Random.Range( 0, MAX_GIBBERS ) ].ToString();
+        _lbl_text.text = _gibberish[ Random.Range( 0, MAX_GIBBERS ) ].ToString();
     }
 }

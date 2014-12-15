@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class PlayerControl : MonoBehaviour
 {
@@ -29,10 +28,10 @@ public class PlayerControl : MonoBehaviour
     //}
 
     /******************************************************************/
-    void Awake()
+    public void Awake()
     {
         _start_position = GameObject.Find( "PlayerSpawn" ).transform.position;
-        ;
+
         //_start_rotation = transform.rotation;
 
         Physics.IgnoreLayerCollision( LayerMask.NameToLayer( "Player" ), LayerMask.NameToLayer( "Player" ) );
@@ -59,7 +58,7 @@ public class PlayerControl : MonoBehaviour
     }
 
     /******************************************************************/
-    void Update()
+    public void Update()
     {
         if ( GameController.instance.Info.GameOver ) {
             return;
@@ -132,7 +131,12 @@ public class PlayerControl : MonoBehaviour
         GameObject ball = Instantiate( SnowBallObject, transform.position, Quaternion.identity ) as GameObject;
 
         // TODO: Would like this to fire a bit harder if we're moving forward
-        ball.GetComponent<Rigidbody>().AddForce( transform.forward * ( CANNON_FORCE + rigidbody.velocity.magnitude ) );
+        if ( ball != null ) {
+            ball.GetComponent<Rigidbody>().AddForce( transform.forward * ( CANNON_FORCE + rigidbody.velocity.magnitude ) );
+        }
+        else {
+            throw new UnityException( "No ball. Going home." );
+        }
     }
 
     /******************************************************************/

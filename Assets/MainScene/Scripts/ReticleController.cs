@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
 
 public class ReticleController : MonoBehaviour
@@ -11,11 +10,7 @@ public class ReticleController : MonoBehaviour
 
     public Image[] ShieldBars;
 
-    void Start()
-    {
-    }
-
-    void Update()
+    public void Update()
     {
         GameObject player = GameController.instance.Player.gameObject;
         Vector3 dir = player.transform.TransformDirection( Vector3.forward );
@@ -33,7 +28,7 @@ public class ReticleController : MonoBehaviour
 
         // Shields
 
-        ShieldBars[ 0 ].enabled = (GameController.instance.Info.Lives > 0);
+        ShieldBars[ 0 ].enabled = ( GameController.instance.Info.Lives > 0 );
         ShieldBars[ 1 ].enabled = ( GameController.instance.Info.Lives > 1 );
         ShieldBars[ 2 ].enabled = ( GameController.instance.Info.Lives > 2 );
     }

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class Snowball : MonoBehaviour
 {
@@ -10,34 +9,25 @@ public class Snowball : MonoBehaviour
 
     private const float LIFETIME = 5.0f;
 
-    void Start()
+    public void Start()
     {
         audio.PlayOneShot( AudioClipFire );
         Destroy( this.gameObject, LIFETIME );
     }
 
-    void Update()
+    public void Update()
     {
-        //if ( !rigidbody.detectCollisions )
-        //    return;
-        //float foo = Mathf.Abs( rigidbody.velocity.x + rigidbody.velocity.y + rigidbody.velocity.z );
-        //if ( foo < 0.01f ) {
-        //    Debug.Log( "Snowball " + GetInstanceID() + " dead velocity: " + foo );
-        //    rigidbody.detectCollisions = false;
-        //    return;
-        //}
-        //Debug.Log( "Snowball " + GetInstanceID() + " LIVE velocity: " + foo );
     }
 
     public void OnCollisionEnter( Collision col )
     {
         AudioSource col_audio =  col.gameObject.GetComponent<AudioSource>();
 
+        // Use the audio source of the collider, if available, otherwise use ours.
         if ( !col_audio ) {
             col_audio = this.audio;
         }
 
         col_audio.PlayOneShot( AudioClipImpact );
-        //Debug.Log( "OH GOD WHAT HAVE I HIT: " + col.gameObject.name );
     }
 }

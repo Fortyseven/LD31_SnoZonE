@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class EnemyTank : MonoBehaviour
 {
@@ -30,7 +29,7 @@ public class EnemyTank : MonoBehaviour
     private float _state_watchdog_timer_hack;
 
     /******************************************************************/
-    void Start()
+    public void Start()
     {
         _treads = GetComponent<TankMovement>();
         Utils.Assert( _treads );
@@ -46,7 +45,7 @@ public class EnemyTank : MonoBehaviour
     }
 
     /******************************************************************/
-    void Update()
+    public void Update()
     {
         if ( _current_state == State.SPAWNING )
             return;
@@ -97,7 +96,7 @@ public class EnemyTank : MonoBehaviour
     {
         if ( !_agent.pathPending ) {
             if ( _agent.remainingDistance <= _agent.stoppingDistance ) {
-                if ( !_agent.hasPath || _agent.velocity.sqrMagnitude == 0f ) {
+                if ( !_agent.hasPath || _agent.velocity.sqrMagnitude == 0f ) { //FIXME: Float point zero comparison
                     return true;
                 }
             }

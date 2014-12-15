@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
-    public static GameController instance = null;
+    public static GameController instance;
 
     public const float PLAYING_FIELD_X_MIN = 10.0f;
     public const float PLAYING_FIELD_X_MAX = 90.0f;
@@ -36,7 +35,7 @@ public class GameController : MonoBehaviour
         {
             if ( Lives == 0 ) {
                 GameOver = true;
-                GameController.instance.OnGameOver();
+                instance.OnGameOver();
             }
         }
 
@@ -58,15 +57,15 @@ public class GameController : MonoBehaviour
 
     public Text    UIScore;
 
-    private int _snowman_count = 0;
+    private int _snowman_count;
     private  float _snowman_spawn_timeout;
     private  float _delay_since_gameover;
 
     /******************************************************************/
-    void Start()
+    public void Start()
     {
         Info = new GameInfo();
-        GameController.instance = this;
+        instance = this;
         CreatePlayer();
         Reset();
     }
@@ -76,8 +75,13 @@ public class GameController : MonoBehaviour
     {
         if ( !_player_instance ) {
             GameObject spawn_point = GameObject.Find( "PlayerSpawn" );
+
             _player_instance = Instantiate( PlayerPrefab, spawn_point.transform.position, spawn_point.transform.rotation ) as GameObject;
-            Player = _player_instance.GetComponent<PlayerControl>();
+
+            if ( _player_instance != null )
+                Player = _player_instance.GetComponent<PlayerControl>();
+            else
+                throw new UnityException( "Problem instantiating Player" );
         }
     }
 
@@ -89,10 +93,11 @@ public class GameController : MonoBehaviour
         Info.Reset();
         Player.Reset();
         _snowman_spawn_timeout = Time.time + DELAY_BETWEEN_SNOWMAN_SPAWN;
+        _snowman_count = 0;
     }
 
     /******************************************************************/
-    void Update()
+    public void Update()
     {
         if ( Info.GameOver ) {
             if ( Time.unscaledTime > _delay_since_gameover ) {
@@ -116,7 +121,7 @@ public class GameController : MonoBehaviour
     public void OnSnowmanKilled()
     {
         _snowman_count--;
-        GameController.instance.Info.Score += 100;
+        instance.Info.Score += 100;
     }
 
     /******************************************************************/
@@ -133,12 +138,11 @@ public class GameController : MonoBehaviour
     /******************************************************************/
     private void SpawnSnowman()
     {
-        Vector3 target;
-        target = new Vector3(
-                       Random.Range( PLAYING_FIELD_X_MIN, PLAYING_FIELD_X_MAX ),
-                       0.0f,
-                       Random.Range( PLAYING_FIELD_Z_MIN, PLAYING_FIELD_Z_MAX )
-                       );
+        var target = new Vector3(
+            Random.Range( PLAYING_FIELD_X_MIN, PLAYING_FIELD_X_MAX ),
+            0.0f,
+            Random.Range( PLAYING_FIELD_Z_MIN, PLAYING_FIELD_Z_MAX )
+            );
 
         Instantiate( SnowmanPrefab, target, Quaternion.identity );
 
